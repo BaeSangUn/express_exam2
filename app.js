@@ -143,6 +143,56 @@ app.delete("/todos/:id", async (req, res) => {
     msg: `${id}번 할일이 삭제되었습니다.`,
   });
 });
+app.post("/todos", async (req, res) => {
+  const { reg_date } = req.body;
+  const { perform_date } = req.body;
+  const { is_completed } = req.body;
+  const { content } = req.body;
+
+  const [rows] = await pool.query(`SELECT * FROM todo`);
+  if (rows.length === 0) {
+    res.status(404).json({
+      msg: "not found",
+    });
+  }
+  if (!reg_date) {
+    res.status(400).json({
+      msg: "reg_date required",
+    });
+    return;
+  }
+  if (!perform_date) {
+    res.status(400).json({
+      msg: "perform_date required",
+    });
+    return;
+  }
+  if (!is_completed) {
+    res.status(400).json({
+      msg: "is_completed required",
+    });
+    return;
+  }
+  if (!content) {
+    res.status(400).json({
+      msg: "content required",
+    });
+    return;
+  }
+  const [rs] = await pool.query(
+    `
+    INSERT todo SET
+    reg_date = NOW(),
+    perform_date = ? ,
+    is_completed = ?,
+    content = ? 
+    `,
+    [reg_date, perform_date, is_completed, content]
+  );
+  res.json({
+    msg: `할 일이 생성되었습니다.`,
+  });
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
