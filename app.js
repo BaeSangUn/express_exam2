@@ -1,5 +1,5 @@
 // app.js
-import express from "express";
+import express, { query } from "express";
 import mysql from "mysql2/promise";
 import axios from "axios";
 import cors from "cors";
@@ -180,24 +180,7 @@ app.post("/todos", async (req, res) => {
       msg: "not found",
     });
   }
-  if (!reg_date) {
-    res.status(400).json({
-      msg: "reg_date required",
-    });
-    return;
-  }
-  if (!perform_date) {
-    res.status(400).json({
-      msg: "perform_date required",
-    });
-    return;
-  }
-  if (!checked) {
-    res.status(400).json({
-      msg: "checked required",
-    });
-    return;
-  }
+
   if (!text) {
     res.status(400).json({
       msg: "text required",
@@ -206,24 +189,20 @@ app.post("/todos", async (req, res) => {
   }
   const [rs] = await pool.query(
     `
-    INSERT todo SET
-    reg_date = NOW(),
-    perform_date = ? ,
-    checked = ?,
+    INSERT todo 
+    SET
     text = ? 
     `,
-    [reg_date, perform_date, checked, text]
+    [text]
   );
-  const [UpdateTodo] = await pool.query(
-    `
-    SELECT *
-    FROM id 
-    ORDER BY id DESC
-    `
-  );
-  res.json(UpdateTodo);
-});
 
+  const [addData] = await pool.query(`
+  SELECT *
+  FROM todo
+  ORDER BY id DESC
+  `);
+  res.json(addData);
+});
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
